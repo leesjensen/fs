@@ -4,14 +4,38 @@ const app = new Vue({
     newComment: '',
     comments: [],
   },
-  created: function () {},
+  created: function () {
+    this.getAll();
+  },
   methods: {
+    getAll() {
+      const url = '/comments';
+      fetch(url)
+        .then((r) => r.json())
+        .then((response) => {
+          this.comments = response;
+        });
+    },
     addComment() {
-      this.comments.push({ title: this.newComment, upvotes: 0 });
-      this.newComment = '';
+      const comment = { title: this.newComment, upvotes: 0 };
+      fetch('/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(comment),
+      })
+        .then((r) => r.json())
+        .then((response) => {
+          this.comments.push(response);
+        });
     },
     incrementUpvotes(item) {
-      item.upvotes = item.upvotes + 1;
+      fetch(`/comments/${item._id}/upvote`, {
+        method: 'PUT',
+      })
+        .then((r) => r.json())
+        .then((response) => {
+          item.upvotes = response.upvotes;
+        });
     },
   },
   computed: {
